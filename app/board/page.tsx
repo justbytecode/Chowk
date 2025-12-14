@@ -6,9 +6,11 @@ import React from 'react';
 import { ToolProvider } from '@/components/Tools/ToolContext';
 import { Toolbar } from '@/components/Tools/Toolbar';
 import { Canvas } from '@/components/Canvas/Canvas';
+import { ThemeProvider } from '@/components/Tools/ThemeContext';
 
 export default function BoardPage() {
   return (
+    <ThemeProvider>
     <ToolProvider>
       <div className="relative w-screen h-screen overflow-hidden bg-gray-50">
         <Toolbar />
@@ -50,5 +52,6 @@ export default function BoardPage() {
         </div>
       </div>
     </ToolProvider>
+    </ThemeProvider>
   );
 }
