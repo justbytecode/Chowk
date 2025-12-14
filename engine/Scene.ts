@@ -113,7 +113,7 @@ export class Scene {
   }
 
   toJSON(): AnyShapeData[] {
-    return this.getAllShapes().map(s => s.data);
+    return this.getAllShapes().map(s => s.data as AnyShapeData);
   }
 
   static fromJSON(data: AnyShapeData[]): Scene {

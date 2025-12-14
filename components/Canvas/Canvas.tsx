@@ -1,4 +1,4 @@
-// components/Canvas/Canvas.tsx (Enhanced Version)
+// components/Canvas/Canvas.tsx (Fixed Version)
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Scene } from '@/engine/Scene';
 import { Renderer } from './Renderer';
@@ -300,21 +300,23 @@ export function Canvas({ initialScene, onSceneChange }: CanvasProps) {
 
     if (currentShape) {
       let updatedShape: Shape = currentShape;
+      const currentId = currentShape.data.id;
       
       if (currentShape instanceof Rectangle) {
         const width = point.x - startPoint.x;
         const height = point.y - startPoint.y;
         updatedShape = Rectangle.create(startPoint.x, startPoint.y, width, height, currentStyle);
-        updatedShape = updatedShape.updateData({ id: currentShape.data.id }) as Rectangle;
+        // Preserve the ID by manually setting it in data
+        (updatedShape.data as any).id = currentId;
       } else if (currentShape instanceof Circle) {
         const dx = point.x - startPoint.x;
         const dy = point.y - startPoint.y;
         const radius = Math.sqrt(dx * dx + dy * dy);
         updatedShape = Circle.create(startPoint.x, startPoint.y, radius, currentStyle);
-        updatedShape = updatedShape.updateData({ id: currentShape.data.id }) as Circle;
+        (updatedShape.data as any).id = currentId;
       } else if (currentShape instanceof Arrow) {
         updatedShape = Arrow.create(startPoint, point, currentStyle);
-        updatedShape = updatedShape.updateData({ id: currentShape.data.id }) as Arrow;
+        (updatedShape.data as any).id = currentId;
       } else if (currentShape instanceof Line) {
         if (currentShape.data.type === 'freehand') {
           const lastPoint = currentShape.data.points[currentShape.data.points.length - 1];
@@ -327,7 +329,7 @@ export function Canvas({ initialScene, onSceneChange }: CanvasProps) {
         } else {
           updatedShape = Line.create(startPoint, currentShape.data.type, currentStyle);
           updatedShape = (updatedShape as Line).addPoint(point);
-          updatedShape = updatedShape.updateData({ id: currentShape.data.id }) as Line;
+          (updatedShape.data as any).id = currentId;
         }
       }
       

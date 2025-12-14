@@ -8,11 +8,14 @@ export type ResizeHandle =
   | 'sw' | 'w'
   | null;
 
+// Non-null handle type for Record keys
+type NonNullResizeHandle = Exclude<ResizeHandle, null>;
+
 export class ResizeHandles {
   private static HANDLE_SIZE = 8;
   private static DETECTION_THRESHOLD = 12;
 
-  static getHandlePositions(bbox: AABB): Record<ResizeHandle, Point> {
+  static getHandlePositions(bbox: AABB): Record<NonNullResizeHandle, Point> {
     const cx = (bbox.minX + bbox.maxX) / 2;
     const cy = (bbox.minY + bbox.maxY) / 2;
 
@@ -25,7 +28,6 @@ export class ResizeHandles {
       s: { x: cx, y: bbox.maxY },
       sw: { x: bbox.minX, y: bbox.maxY },
       w: { x: bbox.minX, y: cy },
-      null: { x: 0, y: 0 },
     };
   }
 
@@ -34,8 +36,6 @@ export class ResizeHandles {
     const threshold = this.DETECTION_THRESHOLD;
 
     for (const [handle, pos] of Object.entries(positions)) {
-      if (handle === 'null') continue;
-      
       const dx = Math.abs(point.x - pos.x);
       const dy = Math.abs(point.y - pos.y);
 

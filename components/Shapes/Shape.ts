@@ -49,17 +49,17 @@ export abstract class Shape<T extends BaseShape = BaseShape> {
   abstract resize(bounds: AABB): Shape<T>;
   
   select(): Shape<T> {
-    return this.updateData({ isSelected: true });
+    return this.updateData({ isSelected: true } as Partial<T>);
   }
   
   deselect(): Shape<T> {
-    return this.updateData({ isSelected: false });
+    return this.updateData({ isSelected: false } as Partial<T>);
   }
   
   updateStyle(style: Partial<ShapeStyle>): Shape<T> {
     return this.updateData({
       style: { ...this.data.style, ...style }
-    });
+    } as Partial<T>);
   }
   
   protected updateData(updates: Partial<T>): Shape<T> {
