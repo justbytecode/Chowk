@@ -1,4 +1,4 @@
-# 🎨 Chowk
+# 🎨 Chalk
 
 <div align="center">
 
