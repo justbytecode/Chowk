@@ -1,6 +1,7 @@
 // components/Shapes/Shape.ts
 
-export type ShapeType = 'rectangle' | 'circle' | 'line' | 'arrow' | 'freehand' | 'text';
+// ADD 'image' to this type union
+export type ShapeType = 'rectangle' | 'circle' | 'line' | 'arrow' | 'freehand' | 'text' | 'image';
 
 export interface Point {
   x: number;

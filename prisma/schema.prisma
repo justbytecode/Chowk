@@ -8,6 +8,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
+model TeamInvitation {
+  id         String   @id @default(cuid())
+  boardId    String
+  board      Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  email      String
+  role       String   // 'admin' or 'member'
+  invitedBy  String
+  status     String   @default("pending") // 'pending', 'accepted', 'declined'
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime @default(dbgenerated("NOW() + INTERVAL '7 days'"))
+
+  @@index([email])
+  @@index([boardId])
+}
+
+
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -36,14 +53,15 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String        @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String?       @unique
   emailVerified DateTime?
   image         String?
   accounts      Account[]
   sessions      Session[]
   boards        Board[]
+  boardMembers  BoardMember[]
 }
 
 model VerificationToken {
@@ -54,16 +72,36 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-model Board {
+
+
+model BoardMember {
   id        String   @id @default(cuid())
-  name      String
-  data      Json
-  viewport  Json?
-  userId    String?
-  user      User?    @relation(fields: [userId], references: [id])
+  boardId   String
+  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String   @default("member") // 'owner', 'admin', 'member'
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+
+  @@unique([boardId, userId])
+  @@index([userId])
+}
+
+// Update Board model to add these relations
+model Board {
+  id          String            @id @default(cuid())
+  name        String
+  data        Json
+  viewport    Json?
+  isPublic    Boolean           @default(false)
+  userId      String?
+  user        User?             @relation(fields: [userId], references: [id])
+  members     BoardMember[]
+  invitations TeamInvitation[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
 
   @@index([updatedAt])
   @@index([userId])
+  @@index([isPublic])
 }
