@@ -8,23 +8,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-model TeamInvitation {
-  id         String   @id @default(cuid())
-  boardId    String
-  board      Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
-  email      String
-  role       String   // 'admin' or 'member'
-  invitedBy  String
-  status     String   @default("pending") // 'pending', 'accepted', 'declined'
-  createdAt  DateTime @default(now())
-  expiresAt  DateTime @default(dbgenerated("NOW() + INTERVAL '7 days'"))
-
-  @@index([email])
-  @@index([boardId])
-}
-
-
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -38,10 +21,10 @@ model Account {
   scope             String?
   id_token          String? @db.Text
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Session {
@@ -50,6 +33,8 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model User {
@@ -62,6 +47,8 @@ model User {
   sessions      Session[]
   boards        Board[]
   boardMembers  BoardMember[]
+
+  @@index([email])
 }
 
 model VerificationToken {
@@ -72,7 +59,23 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+model Board {
+  id          String            @id @default(cuid())
+  name        String
+  data        Json
+  viewport    Json?
+  isPublic    Boolean           @default(false)
+  userId      String?
+  user        User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  members     BoardMember[]
+  invitations TeamInvitation[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
 
+  @@index([updatedAt])
+  @@index([userId])
+  @@index([isPublic])
+}
 
 model BoardMember {
   id        String   @id @default(cuid())
@@ -85,23 +88,23 @@ model BoardMember {
 
   @@unique([boardId, userId])
   @@index([userId])
+  @@index([boardId])
 }
 
-// Update Board model to add these relations
-model Board {
-  id          String            @id @default(cuid())
-  name        String
-  data        Json
-  viewport    Json?
-  isPublic    Boolean           @default(false)
-  userId      String?
-  user        User?             @relation(fields: [userId], references: [id])
-  members     BoardMember[]
-  invitations TeamInvitation[]
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+model TeamInvitation {
+  id         String   @id @default(cuid())
+  boardId    String
+  board      Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  email      String
+  role       String   // 'admin' or 'member'
+  invitedBy  String?  // Email of the inviter (nullable in case user is deleted)
+  status     String   @default("pending") // 'pending', 'accepted', 'declined'
+  token      String   @unique @default(cuid()) // Unique token for accepting invitation
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime @default(dbgenerated("NOW() + INTERVAL '7 days'"))
 
-  @@index([updatedAt])
-  @@index([userId])
-  @@index([isPublic])
+  @@index([email])
+  @@index([boardId])
+  @@index([token])
+  @@index([status])
 }

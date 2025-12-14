@@ -1,5 +1,4 @@
-// app/api/team/invite/route.ts - NEW FILE
-
+// app/api/team/invite/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
@@ -8,9 +7,10 @@ import { authOptions } from '@/lib/auth';
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    
+    if (!session?.user?.email) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Unauthorized - user email not found' },
         { status: 401 }
       );
     }
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
         boardId,
         email,
         role,
-        invitedBy: session.user.email,
+        invitedBy: session.user.email, // Now TypeScript knows this is not null/undefined
         status: 'pending',
       },
     });
